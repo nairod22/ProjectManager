@@ -1,0 +1,35 @@
+@startuml
+participant Client
+    participant Server
+    
+    Note over Client,Server: Connection Establishment
+    Client->>Server: HELLO
+    Server-->>Client: PROJL [list]/ERROR
+    
+    Note over Client,Server: Project Operations   
+    Client->>Server: PROJS [name]
+    
+    Server-->>Client: PROJD [project_data]/ERROR
+    
+    Note over Client,Server: Project Modification
+    Client->>Server: ADDPR [project_info]
+    Server-->>Client: OKAYY/ERROR
+    
+    Client->>Server: DELPR [name]
+    Server-->>Client: OKAYY/ERROR
+    
+    Note over Client,Server: Task Operations
+    Client->>Server: ADDTS [task_info]
+    Server-->>Client: OKAYY/ERROR
+    
+    Client->>Server: DELTS [name]
+    Server-->>Client: OKAYY/ERROR
+
+    Note over Client,Server: Task getters / modifiers
+    Client->>Server: GETTS [name]
+    Server-->>Client: TASKD [task_data]
+
+    Client->>Server: MODTS [name] [task_data]
+    Server-->>Client: OKAYY/ERROR
+
+@enduml
