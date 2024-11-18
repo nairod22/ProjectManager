@@ -57,8 +57,13 @@ public class Server implements Callable<Integer> {
             String[] clientRequestParts = clientRequest.split(" ", 2);
 
             Client.Message message = null;
+            String arg = "";
             try {
               message = Client.Message.valueOf(clientRequestParts[0]);
+
+              if (clientRequestParts.length > 1) {
+                arg = clientRequestParts[1];
+              }
             } catch (Exception e) {
               // Do nothing
             }
@@ -67,47 +72,47 @@ public class Server implements Callable<Integer> {
 
             switch (message) {
               case HELLO -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case PROJL -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case PROJS -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case ADDPRJ -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case DELPR -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case ADDTS -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case DELTS -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case GETTS -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case MODTS -> {
-                System.out.println("[SERVER] " + clientRequestParts[1]);
+                System.out.println("[SERVER] receive " + message);
                 response = Message.OKAYY + END_OF_LINE;
               }
 

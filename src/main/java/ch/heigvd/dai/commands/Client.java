@@ -62,7 +62,12 @@ public class Client implements Callable<Integer> {
         try {
           String[] userInputParts = userInput.split(" ", 2);
           Message message = Message.valueOf(userInputParts[0].toUpperCase());
-          String arg = userInputParts[1]; //todo : est-ce que c'est ok ?
+
+          //todo : est-ce que c'est ok ?
+          String arg = "";
+          if (userInputParts.length > 1) {
+            arg = userInputParts[1];
+          }
 
           String request = null;
 
@@ -72,7 +77,7 @@ public class Client implements Callable<Integer> {
             }
 
             case PROJL -> {
-              request = Message.PROJL + arg + END_OF_LINE;
+              request = Message.PROJL + " " + arg + END_OF_LINE;
             }
 
             case PROJS -> {
@@ -114,6 +119,7 @@ public class Client implements Callable<Integer> {
             out.flush();
           }
         } catch (Exception e) {
+
           System.out.println("Invalid command. Please try again.");
           continue;
         }
@@ -129,8 +135,14 @@ public class Client implements Callable<Integer> {
         String[] serverResponseParts = serverResponse.split(" ", 2);
 
         Server.Message message = null;
+        String arg = "";
+
         try {
           message = Server.Message.valueOf(serverResponseParts[0]);
+          if (serverResponseParts.length > 1) {
+            arg = serverResponseParts[1];
+          }
+
         } catch (IllegalArgumentException e) {
           // Do nothing
         }
@@ -138,25 +150,25 @@ public class Client implements Callable<Integer> {
         //todo : a finir d'implémenter une fois les réponses du servers sont implémentée correctement
         switch (message) {
           case PROJL -> {
-            System.out.println("[Servor] List des projets : ");
-            System.out.println(serverResponseParts[1]);
+            System.out.println("[Client] receive : List des projets : ");
+            //System.out.println(arg);
           }
           case ERROR -> {
-            System.out.println("[Servor] return ERROR");
+            System.out.println("[Client] Receive ERROR");
           }
 
           case OKAYY -> {
-            System.out.println("[Servor] return OKAYY");
+            System.out.println("[Client]  Receive OKAYY");
           }
 
           case PROJD -> {
-            System.out.println("[Servor] Données du projet : ");
-            System.out.println(serverResponseParts[1]);
+            System.out.println("[Client] Receive Données du projet : ");
+            //System.out.println(serverResponseParts[1]);
           }
 
           case TASKD -> {
-            System.out.println("[Servor] Données de la tâche");
-            System.out.println(serverResponseParts[1]);
+            System.out.println("[Client] ReceiveDonnées de la tâche");
+            //System.out.println(serverResponseParts[1]);
           }
           case null, default ->
                   System.out.println("Invalid/unknown command sent by server, ignore.");
