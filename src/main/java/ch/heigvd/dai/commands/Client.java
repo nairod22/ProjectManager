@@ -11,8 +11,16 @@ import picocli.CommandLine;
 public class Client implements Callable<Integer> {
 
   public enum Message {
-    TEST,
-    STOP
+   HELLO,
+    PROJL,
+    PROJS,
+    ADDPRJ,
+    DELPR,
+    ADDTS,
+    DELTS,
+    GETTS,
+    MODTS,
+    HELP,
   }
 
   // End of line character
@@ -54,17 +62,51 @@ public class Client implements Callable<Integer> {
         try {
           String[] userInputParts = userInput.split(" ", 2);
           Message message = Message.valueOf(userInputParts[0].toUpperCase());
+          String arg = userInputParts[1]; //todo : est-ce que c'est ok ?
 
           String request = null;
 
           switch (message) {
-            case TEST -> {
-              request = Message.TEST + END_OF_LINE;
+            case HELLO -> {
+              request = Message.HELLO + END_OF_LINE;
             }
-            case STOP -> {
-              socket.close();
-              continue;
+
+            case PROJL -> {
+              request = Message.PROJL + arg + END_OF_LINE;
             }
+
+            case PROJS -> {
+              request = Message.PROJS + " " + arg + END_OF_LINE;
+            }
+
+            case ADDPRJ -> {
+              request = Message.ADDPRJ + " " + arg + END_OF_LINE;
+            }
+
+            case DELPR -> {
+              request = Message.DELPR + " " + arg + END_OF_LINE;
+            }
+
+            case ADDTS -> {
+              request = Message.ADDTS + " " + arg + END_OF_LINE;
+            }
+
+            case DELTS -> {
+              request = Message.DELTS + " " + arg + END_OF_LINE;
+            }
+
+            case GETTS -> {
+              request = Message.GETTS + " " + arg + END_OF_LINE;
+            }
+
+            case MODTS -> {
+              request = Message.MODTS + " " + arg + END_OF_LINE;
+            }
+
+            case HELP -> {
+              help();
+            }
+            //pas de default -> erreur gérée dans le catch !
           }
 
           if (request != null) {
@@ -93,8 +135,29 @@ public class Client implements Callable<Integer> {
           // Do nothing
         }
 
+        //todo : a finir d'implémenter une fois les réponses du servers sont implémentée correctement
         switch (message) {
-          case HELLO -> System.out.println("Server says HELLO...");
+          case PROJL -> {
+            System.out.println("[Servor] List des projets : ");
+            System.out.println(serverResponseParts[1]);
+          }
+          case ERROR -> {
+            System.out.println("[Servor] return ERROR");
+          }
+
+          case OKAYY -> {
+            System.out.println("[Servor] return OKAYY");
+          }
+
+          case PROJD -> {
+            System.out.println("[Servor] Données du projet : ");
+            System.out.println(serverResponseParts[1]);
+          }
+
+          case TASKD -> {
+            System.out.println("[Servor] Données de la tâche");
+            System.out.println(serverResponseParts[1]);
+          }
           case null, default ->
                   System.out.println("Invalid/unknown command sent by server, ignore.");
         }
@@ -107,9 +170,17 @@ public class Client implements Callable<Integer> {
     return 0;
   }
 
+  //todo : corriger les arg dans le schéma ?
   private static void help() {
     System.out.println("Usage:");
-    System.out.println("  " + Message.TEST + " this is a test message. No message to display yet !");
-    System.out.println("  " + Message.STOP + " this is a stop message.");
+    System.out.println("  " + Message.HELLO + " - Display the list of projects.");
+    System.out.println("  " + Message.PROJS + " <project_name> - Get data linked with selected.");
+    System.out.println("  " + Message.ADDPRJ + " <project_info> - Add a new project.");
+    System.out.println("  " + Message.DELPR + " <project_name> - Delete a project.");
+    System.out.println("  " + Message.ADDTS + " <task_info> - Add a new task.");
+    System.out.println("  " + Message.DELTS + " <task_name> - Delete a task.");
+    System.out.println("  " + Message.GETTS + " <task_name> - Add a task to the project .");
+    System.out.println("  " + Message.MODTS + " <task_name> - Modify a task.");
+    System.out.println("  " + Message.HELP + " - Display help.");
   }
 }

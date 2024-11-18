@@ -10,8 +10,11 @@ import picocli.CommandLine;
 @CommandLine.Command(name = "server", description = "Start the server part of the network game.")
 public class Server implements Callable<Integer> {
   public enum Message {
-    HELLO,
-    TESTB
+    PROJL,
+    PROJD,
+    OKAYY,
+    ERROR,
+    TASKD
   }
 
   // End of line character
@@ -63,11 +66,51 @@ public class Server implements Callable<Integer> {
             String response;
 
             switch (message) {
-              //todo : comment passer de MESSAGE à une string ?
-              case TEST -> {
-                System.out.println("[Server] Testing test");
-                response = "test"; //TESTBACK !
+              case HELLO -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
               }
+
+              case PROJL -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case PROJS -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case ADDPRJ -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case DELPR -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case ADDTS -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case DELTS -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case GETTS -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case MODTS -> {
+                System.out.println("[SERVER] " + clientRequestParts[1]);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
               case null, default -> {
                 System.out.println("[Server] Testing default message");
                 response = "default";
