@@ -1,0 +1,14 @@
+# Project List
+P: <Project1>
+[<task1>, <task2>, <task3>, ...]
+<Project1:task1> [priority:high, due:2024-12-01]
+
+P: <Project2>
+[<task1>, <task2>, ...]
+Project2:task2 [priority:low, due:2024-11-30]
+
+P: ...
+
+# Project start with a P.
+# The you find the list of the tasks linked with it
+# Finallay, you can find meta-data if needed. One task may not have any meta-dat about it.
