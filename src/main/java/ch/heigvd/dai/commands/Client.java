@@ -79,7 +79,6 @@ public class Client implements Callable<Integer> {
             case PROJL -> {
               request = Message.PROJL + END_OF_LINE;
             }
-
             case PROJS -> {
               request = Message.PROJS + " " + arg + END_OF_LINE;
             }
