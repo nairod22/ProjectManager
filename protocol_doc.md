@@ -55,18 +55,18 @@
 ### HELLO
 - Purpose: Establish connection with server
 - Request: `HELLO`
-  - Response: 
-    - Success: `PROJL [json_project_list]` - Returns list of all projects
-    ```
-    {
-      "projectNames": [
-        "Project1",
-        "Project2",
-        "Project3"
-      ]
-    }
-    ```
-    - Failure: `ERROR [error_message]`
+- Response: 
+  - Success: `PROJL [json_project_list]` - Returns list of all projects
+  ```
+  {
+    "projectNames": [
+      "Project1",
+      "Project2",
+      "Project3"
+    ]
+  }
+  ```
+  - Failure: `ERROR [error_message]`
 
 
 
@@ -76,7 +76,9 @@
 - Request: `PROJS [project_name]`
 - Parameters:
   - project_name: String identifier of the project
-
+- Response:
+  - Success: `PROJD [project_data]`
+  - Failure: `ERROR [error_message]`
 ### PROJD (Project Data)
 - Purpose: Server response containing project details
   - Response: 
@@ -248,5 +250,8 @@
 - Indicates successful completion of requested operation
 ### ERROR
 - Indicates operation failure
-- Always accompanied by error message explaining the failure reason
+- Always accompanied by error number explaining the failure reason
+
+### Error Codes
+//todo
 
