@@ -77,7 +77,7 @@ public class Client implements Callable<Integer> {
             }
 
             case PROJL -> {
-              request = Message.PROJL + " " + arg + END_OF_LINE;
+              request = Message.PROJL + END_OF_LINE;
             }
 
             case PROJS -> {
@@ -150,7 +150,7 @@ public class Client implements Callable<Integer> {
         //todo : a finir d'implémenter une fois les réponses du servers sont implémentée correctement
         switch (message) {
           case PROJL -> {
-            System.out.println("[Client] receive : List des projets : ");
+            System.out.println("[Client] receive projetcs list : ");
             //System.out.println(arg);
           }
           case ERROR -> {

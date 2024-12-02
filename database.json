@@ -1,0 +1,40 @@
+{
+  "projects": [
+    {
+      "name": "Project1",
+      "tasks": [
+        {
+          "name": "task1",
+          "metadata": {
+            "priority": "high",
+            "due": "2024-12-01"
+          }
+        },
+        {
+          "name": "task2",
+          "metadata": null
+        },
+        {
+          "name": "task3",
+          "metadata": null
+        }
+      ]
+    },
+    {
+      "name": "Project2",
+      "tasks": [
+        {
+          "name": "task1",
+          "metadata": null
+        },
+        {
+          "name": "task2",
+          "metadata": {
+            "priority": "low",
+            "due": "2024-11-30"
+          }
+        }
+      ]
+    }
+  ]
+}
