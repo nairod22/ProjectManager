@@ -21,6 +21,7 @@ public class Server implements Callable<Integer> {
     ERROR,
     TASKD
   }
+
   // End of line character
   public static String END_OF_LINE = "\n";
 
@@ -30,8 +31,10 @@ public class Server implements Callable<Integer> {
           defaultValue = "6433")
   protected int port;
 
+  Gson gson = new Gson();
+
   //Database
-  private Database database;
+  public Database database = new Database();
 
   @Override
   public Integer call() {
@@ -56,6 +59,7 @@ public class Server implements Callable<Integer> {
             String clientRequest = in.readLine();
 
             if (clientRequest == null) {
+              save();
               socket.close();
               continue;
             }
@@ -74,13 +78,22 @@ public class Server implements Callable<Integer> {
               // Do nothing
             }
 
-            String response;
-            Gson gson = new Gson();
+            String response = "";
             String projectSelected = "";
 
             switch (message) {
               case HELLO -> {
-                String projectList = gson.toJson(database.getProjects());
+                System.out.println("[test] Hello received");
+
+                //test -> pour avoir un project dans la database...
+                Project project_test = new Project("test1");
+                database.addProject(project_test);
+                Project project_test2 = new Project("test2");
+                database.addProject(project_test2);
+
+                String projectList = gson.toJson(database.getProjectsList());
+                System.out.println("[test] " + projectList);
+
                 if (projectList != null)
                   response = Message.PROJL + " " + projectList + END_OF_LINE;
                 else
@@ -139,9 +152,14 @@ public class Server implements Callable<Integer> {
                 response = Message.OKAYY + END_OF_LINE; //gestion erreur !
               }
 
+              case CLOSE -> {
+                //save the database
+                save();
+                socket.close();
+              }
+
               case null, default -> {
-                System.out.println("[Server] Testing default message");
-                response = "default";
+                System.out.println("[e] Invalid message received: " + clientRequest);
               }
             }
 
@@ -160,8 +178,21 @@ public class Server implements Callable<Integer> {
       return 1;
     }
 
+
+
     return 0;
   }
 
+  private void save(){
+    String database = gson.toJson(this.database);
+    try (FileWriter file = new FileWriter("database.json")) {
+      file.write(database);
+      file.flush();
+    } catch (IOException e) {
+      System.out.println("[e] failed to save the database");
+    }
+  }
 }
+
+
 

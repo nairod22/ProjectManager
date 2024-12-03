@@ -1,5 +1,6 @@
 package ch.heigvd.dai.database;
 
+import javax.xml.crypto.Data;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,5 +39,15 @@ public class Database {
                 projects.remove(project);
             }
         }
+    }
+
+    public Database getProjectsList() {
+        //return the empty database with just the title
+        Database db = new Database();
+        for (Project project : projects) {
+            db.addProject(new Project(project.getName()));
+        }
+
+        return db;
     }
 }

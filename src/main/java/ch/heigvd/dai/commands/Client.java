@@ -5,6 +5,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
+
+import ch.heigvd.dai.database.Database;
+import com.google.gson.Gson;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "client", description = "Start the client part of the network game.")
@@ -21,10 +24,13 @@ public class Client implements Callable<Integer> {
     GETTS,
     MODTS,
     HELP,
+    CLOSE
   }
 
   // End of line character
   public static String END_OF_LINE = "\n";
+
+  Gson gson = new Gson();
 
   @CommandLine.Option(
           names = {"-H", "--host"},
@@ -147,10 +153,15 @@ public class Client implements Callable<Integer> {
         }
 
         //todo : a finir d'implémenter une fois les réponses du servers sont implémentée correctement
+
         switch (message) {
           case PROJL -> {
-            System.out.println("[Client] receive projetcs list : ");
-            //System.out.println(arg);
+
+            //test for json usage
+            System.out.println("[test] receive projetcs list with json format.");
+            System.out.println("[test] " + arg);
+            Database db = gson.fromJson(arg, Database.class);
+            System.out.println("[test] " + db.getProject("test1").getName() + db.getProject("test2").getName());
           }
           case ERROR -> {
             System.out.println("[Client] Receive ERROR");
