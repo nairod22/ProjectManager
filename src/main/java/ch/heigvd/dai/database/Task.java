@@ -9,4 +9,15 @@ public class Task {
         this.name = name;
         this.metadata = metadata;
     }
+
+    public Task(Task task){
+        this.name = task.name;
+        this.metadata = task.metadata;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+
 }

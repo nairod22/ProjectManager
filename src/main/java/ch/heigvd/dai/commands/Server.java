@@ -5,6 +5,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
+
+import ch.heigvd.dai.database.Database;
+import ch.heigvd.dai.database.Project;
+import ch.heigvd.dai.database.Task;
+import com.google.gson.Gson;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "server", description = "Start the server part of the network game.")
@@ -16,9 +21,7 @@ public class Server implements Callable<Integer> {
     ERROR,
     TASKD
   }
-
   // End of line character
-  //todo : make something for sharing the end of line char ?
   public static String END_OF_LINE = "\n";
 
   @CommandLine.Option(
@@ -26,6 +29,9 @@ public class Server implements Callable<Integer> {
           description = "Port to use (default: ${DEFAULT-VALUE}).",
           defaultValue = "6433")
   protected int port;
+
+  //Database
+  private Database database;
 
   @Override
   public Integer call() {
@@ -69,51 +75,68 @@ public class Server implements Callable<Integer> {
             }
 
             String response;
+            Gson gson = new Gson();
+            String projectSelected = "";
 
             switch (message) {
               case HELLO -> {
-                System.out.println("[SERVER] receive " + message);
-                response = Message.OKAYY + END_OF_LINE;
-              }
-
-              case PROJL -> {
-                System.out.println("[SERVER] receive " + message);
-                response = Message.OKAYY + END_OF_LINE;
+                String projectList = gson.toJson(database.getProjects());
+                if (projectList != null)
+                  response = Message.PROJL + " " + projectList + END_OF_LINE;
+                else
+                  response = Message.ERROR + END_OF_LINE; //+ numéro d'erreur !
               }
 
               case PROJS -> {
-                System.out.println("[SERVER] receive " + message);
-                response = Message.OKAYY + END_OF_LINE;
+                String projectData = gson.toJson(database.getProject(arg));
+                if (projectData != null){
+                  response = Message.PROJD + " " + projectData + END_OF_LINE;
+                  projectSelected = arg;
+                }
+
+                else
+                  response = Message.ERROR + END_OF_LINE; //+ numéro d'erreur !
               }
 
               case ADDPRJ -> {
-                System.out.println("[SERVER] receive " + message);
+                //faire gestion d'erreur !
+                Project project = gson.fromJson(arg, Project.class);
+                this.database.addProject(project);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case DELPR -> {
-                System.out.println("[SERVER] receive " + message);
+                //faire gestion d'erreur !
+                this.database.deleteProject(arg);
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case ADDTS -> {
-                System.out.println("[SERVER] receive " + message);
-                response = Message.OKAYY + END_OF_LINE;
+                Task task = gson.fromJson(arg, Task.class);
+                database.getProject(projectSelected).addTask(task); //faire à partir du constructeur ?
+                response = Message.OKAYY + END_OF_LINE; //+ numéro d'erreur !
               }
 
               case DELTS -> {
-                System.out.println("[SERVER] receive " + message);
+                database.getProject(projectSelected).removeTask(arg); //faire méthode pour selectionné le bon projet et la bonne tâche !
                 response = Message.OKAYY + END_OF_LINE;
               }
 
               case GETTS -> {
-                System.out.println("[SERVER] receive " + message);
-                response = Message.OKAYY + END_OF_LINE;
+                String taskData = gson.toJson(database.getProject(projectSelected).getTask(arg));
+                if (taskData != null)
+                  response = Message.TASKD + " " + taskData + END_OF_LINE;
+                else
+                  response = Message.ERROR + END_OF_LINE; //+ numéro d'erreur !
               }
 
               case MODTS -> {
-                System.out.println("[SERVER] receive " + message);
-                response = Message.OKAYY + END_OF_LINE;
+                //todo : dépends de comment sera implémenté la modification
+                Task task_to_modify = gson.fromJson(arg, Task.class);
+                String name = task_to_modify.getName();
+                database.getProject(projectSelected).removeTask(name);
+                database.getProject(projectSelected).addTask(task_to_modify);
+                response = Message.OKAYY + END_OF_LINE; //gestion erreur !
               }
 
               case null, default -> {
