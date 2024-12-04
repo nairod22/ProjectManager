@@ -6,6 +6,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.*;
 
+import java.util.concurrent.Callable;
+
+import ch.heigvd.dai.database.Database;
+import ch.heigvd.dai.database.Project;
+import ch.heigvd.dai.database.Task;
+import com.google.gson.Gson;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "server", description = "Start the server part of the network game.")
@@ -19,6 +25,7 @@ public class Server implements Callable<Integer> {
   }
 
   // End of line character
+  //todo : make something for sharing the end of line char ?
   public static String END_OF_LINE = "\n";
 
   @CommandLine.Option(
@@ -26,6 +33,11 @@ public class Server implements Callable<Integer> {
           description = "Port to use (default: ${DEFAULT-VALUE}).",
           defaultValue = "6433")
   protected int port;
+
+  Gson gson = new Gson();
+
+  //Database
+  public Database database = new Database();
 
   @Override
   public Integer call() {
@@ -72,10 +84,11 @@ public class Server implements Callable<Integer> {
         while (!socket.isClosed()) {
           String clientRequest = in.readLine();
 
-          if (clientRequest == null) {
-            socket.close();
-            continue;
-          }
+            if (clientRequest == null) {
+              save();
+              socket.close();
+              continue;
+            }
 
           String[] clientRequestParts = clientRequest.split(" ", 2);
 
@@ -92,67 +105,117 @@ public class Server implements Callable<Integer> {
           }
 
           String response;
+          String projectSelected = "";
 
-          switch (message) {
-            case HELLO -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
+            switch (message) {
+              case HELLO -> {
+                System.out.println("[test] Hello received");
+
+                //test -> pour avoir un project dans la database...
+                Project project_test = new Project("test1");
+                database.addProject(project_test);
+                Project project_test2 = new Project("test2");
+                database.addProject(project_test2);
+
+                String projectList = gson.toJson(database.getProjectsList());
+                System.out.println("[test] " + projectList);
+
+                if (projectList != null)
+                  response = Message.PROJL + " " + projectList + END_OF_LINE;
+                else
+                  response = Message.ERROR + END_OF_LINE; //+ numéro d'erreur !
+              }
+
+              case PROJS -> {
+                String projectData = gson.toJson(database.getProject(arg));
+                if (projectData != null){
+                  response = Message.PROJD + " " + projectData + END_OF_LINE;
+                  projectSelected = arg;
+                }
+
+                else
+                  response = Message.ERROR + END_OF_LINE; //+ numéro d'erreur !
+              }
+
+              case ADDPRJ -> {
+                //faire gestion d'erreur !
+                Project project = gson.fromJson(arg, Project.class);
+                this.database.addProject(project);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case DELPR -> {
+                //faire gestion d'erreur !
+                this.database.deleteProject(arg);
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case ADDTS -> {
+                Task task = gson.fromJson(arg, Task.class);
+                database.getProject(projectSelected).addTask(task); //faire à partir du constructeur ?
+                response = Message.OKAYY + END_OF_LINE; //+ numéro d'erreur !
+              }
+
+              case DELTS -> {
+                database.getProject(projectSelected).removeTask(arg); //faire méthode pour selectionné le bon projet et la bonne tâche !
+                response = Message.OKAYY + END_OF_LINE;
+              }
+
+              case GETTS -> {
+                String taskData = gson.toJson(database.getProject(projectSelected).getTask(arg));
+                if (taskData != null)
+                  response = Message.TASKD + " " + taskData + END_OF_LINE;
+                else
+                  response = Message.ERROR + END_OF_LINE; //+ numéro d'erreur !
+              }
+
+              case MODTS -> {
+                //todo : dépends de comment sera implémenté la modification
+                Task task_to_modify = gson.fromJson(arg, Task.class);
+                String name = task_to_modify.getName();
+                database.getProject(projectSelected).removeTask(name);
+                database.getProject(projectSelected).addTask(task_to_modify);
+                response = Message.OKAYY + END_OF_LINE; //gestion erreur !
+              }
+
+              case CLOSE -> {
+                //save the database
+                save();
+                socket.close();
+              }
+
+              case null, default -> {
+                System.out.println("[e] Invalid message received: " + clientRequest);
+              }
             }
 
-            case PROJL -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
-            }
-
-            case PROJS -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
-            }
-
-            case ADDPRJ -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
-            }
-
-            case DELPR -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
-            }
-
-            case ADDTS -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
-            }
-
-            case DELTS -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
-            }
-
-            case GETTS -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
-            }
-
-            case MODTS -> {
-              System.out.println("[SERVER] receive " + message);
-              response = Server.Message.OKAYY + END_OF_LINE;
-            }
-
-            case null, default -> {
-              System.out.println("[Server] Testing default message");
-              response = "default";
-            }
+            out.write(response);
+            out.flush();
           }
 
-          out.write(response);
-          out.flush();
+          System.out.println("[Server] Closing connection");
+        } catch (IOException e) {
+          System.out.println("[Server] IO exception: " + e);
+          return 1;
         }
-
-        System.out.println("[Server] Closing connection");
-      } catch (IOException e) {
-        System.out.println("[Server] IO exception: " + e);
       }
+    } catch (IOException e) {
+      System.out.println("[Server] IO exception: " + e);
+      return 1;
+    }
+
+
+
+    return 0;
+  }
+
+  private void save(){
+    String database = gson.toJson(this.database);
+    try (FileWriter file = new FileWriter("database.json")) {
+      file.write(database);
+      file.flush();
+    } catch (IOException e) {
+      System.out.println("[e] failed to save the database");
     }
   }
 }
