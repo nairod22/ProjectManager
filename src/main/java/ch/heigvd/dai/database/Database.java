@@ -11,8 +11,9 @@ public class Database {
         this.projects = new LinkedList<Project>();
     }
 
-    public void addProject(Project project) {
-        projects.add(project);
+    public int addProject(Project project) {
+        boolean result = projects.add(project);
+        return result ? 0 : -1;
     }
 
     public void removeProject(Project project) {
@@ -33,12 +34,15 @@ public class Database {
     }
 
     //faire une gestion d'erreur ?
-    public void deleteProject(String name) {
+    public boolean deleteProject(String name) {
         for (Project project : projects) {
             if (project.getName().equals(name)) {
                 projects.remove(project);
+                return true;
             }
         }
+
+        return false;
     }
 
     public Database getProjectsList() {
