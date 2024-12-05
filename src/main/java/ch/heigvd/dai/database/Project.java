@@ -2,6 +2,7 @@ package ch.heigvd.dai.database;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Project {
     private String name;
@@ -9,8 +10,11 @@ public class Project {
 
     //must have a name, but the task list could be null
     public Project(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Project name cannot be null");
+        }
         this.name = name;
-        this.tasks = new LinkedList<Task>();
+        this.tasks = new CopyOnWriteArrayList<>();
     }
 
     public String getName() {

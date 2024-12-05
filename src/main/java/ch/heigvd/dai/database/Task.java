@@ -6,6 +6,10 @@ public class Task {
 
     //metadata can be null
     public Task(String name, Metadata metadata) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Task name cannot be null");
+        }
+
         this.name = name;
         this.metadata = metadata;
     }

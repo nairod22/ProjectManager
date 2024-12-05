@@ -3,25 +3,22 @@ package ch.heigvd.dai.database;
 import javax.xml.crypto.Data;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Database {
-    private List<Project> projects;
+    private final List<Project> projects;
 
     public Database() {
-        this.projects = new LinkedList<Project>();
+        this.projects = new CopyOnWriteArrayList<>();
     }
 
-    public int addProject(Project project) {
-        boolean result = projects.add(project);
-        return result ? 0 : -1;
-    }
-
-    public void removeProject(Project project) {
-        projects.remove(project);
-    }
-
-    public List<Project> getProjects() {
-        return projects;
+    public boolean addProject(Project project) {
+        if (getProject(project.getName()) != null) {
+            // Le projet existe déjà
+            return false;
+        }
+        projects.add(project);
+        return true;
     }
 
     public Project getProject(String name) {
