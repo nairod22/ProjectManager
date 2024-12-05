@@ -73,9 +73,17 @@ public class Server implements Callable<Integer> {
 
       loadDatabase();
 
-      while (!serverSocket.isClosed()) {
-        Socket clientSocket = serverSocket.accept();
-        executor.submit(new ClientHandler(clientSocket, database));
+      while (!Thread.currentThread().isInterrupted()) {
+        try {
+          Socket clientSocket = serverSocket.accept();
+          executor.submit(new ClientHandler(clientSocket, database));
+        } catch (IOException e) {
+          if (serverSocket.isClosed()) {
+            System.out.println("[SERVER] Server socket closed.");
+            break;
+          }
+          System.out.println("[SERVER e] Error accepting client: " + e);
+        }
       }
 
       saveDatabase();
@@ -84,8 +92,6 @@ public class Server implements Callable<Integer> {
     } catch (IOException e) {
       System.out.println("[SERVER e] IO exception: " + e);
       return 1;
-    } finally {
-      System.out.println("[SERVER] Closing server");
     }
   }
 
@@ -140,26 +146,31 @@ public class Server implements Callable<Integer> {
 
           switch (message) {
             case HELLO -> {
-              String projectList = gson.toJson(database.getProjectsList());
+              try {
+                String projectList = gson.toJson(database.getProjectsList());
+                if (projectList != null) //project list could be empty and still not being an error !
+                  response = Message.PROJL + " " + projectList + END_OF_LINE;
+                else
+                  response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
 
-              if (projectList != null) //project list could be empty and still not being an error !
-                response = Message.PROJL + " " + projectList + END_OF_LINE;
-              else
+              } catch (Exception e) {
                 response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
+              }
             }
 
             case PROJS -> {
-              //on essaie de récupérer les data du projet demandé
-              String projectData = gson.toJson(database.getProject(arg));
-              if (projectData != null) { // c'est à dire que database a retourné le projet demandé
-                response = Message.PROJD + " " + projectData + END_OF_LINE;
-              } else // c'est à dire que database n'a pas trouvé le projet demandé
-                response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
+              try {
+                String projectData = gson.toJson(database.getProject(arg));
+                if (projectData != null) { // c'est à dire que database a retourné le projet demandé
+                  response = Message.PROJD + " " + projectData + END_OF_LINE;
+                } else // c'est à dire que database n'a pas trouvé le projet demandé
+                  response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
+              } catch (Exception e) {
+                response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
+              }
             }
 
             case ADDPRJ -> {
-              //todo : does ADDPRJ just add an empty project ?
-
               Project project;
               try {
                 project = gson.fromJson(arg, Project.class);
@@ -173,11 +184,15 @@ public class Server implements Callable<Integer> {
             }
 
             case DELPR -> {
-              boolean deleted = this.database.deleteProject(arg);
-              if (deleted){
-                response = Message.OKAYY + END_OF_LINE;
-              } else {
-                response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
+              try {
+                boolean deleted = this.database.deleteProject(arg);
+                if (deleted){
+                  response = Message.OKAYY + END_OF_LINE;
+                } else {
+                  response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
+                }
+              } catch (Exception e) {
+                response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
               }
             }
 
@@ -193,12 +208,16 @@ public class Server implements Callable<Integer> {
             }
 
             case DELTS -> {
-              //une autre façon simple de faire... ?
-              if (database.getProject(projectSelected).getTask(arg) == null) {
+              try {
+                if (database.getProject(projectSelected).getTask(arg) == null) {
+                  response = Message.ERROR + " " + Error.INVALID_TASK + END_OF_LINE;
+                } else {
+                  database.getProject(projectSelected).removeTask(arg);
+                  response = Message.OKAYY + END_OF_LINE;
+                }
+              } catch (Exception e) {
                 response = Message.ERROR + " " + Error.INVALID_TASK + END_OF_LINE;
-              } else
-              database.getProject(projectSelected).removeTask(arg);
-              response = Message.OKAYY + END_OF_LINE;
+              }
             }
 
             case GETTS -> {
@@ -225,7 +244,10 @@ public class Server implements Callable<Integer> {
             }
 
             case CLOSE -> {
-              //todo : message d'erreur en plus ?
+              System.out.println("[SERVER] Client requested to close the connection.");
+              response = Message.OKAYY + END_OF_LINE; // Acknowledge the CLOSE command
+              out.write(response);
+              out.flush();
               socket.close();
             }
 
