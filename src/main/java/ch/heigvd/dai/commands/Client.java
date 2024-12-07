@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import ch.heigvd.dai.database.Database;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "client", description = "Start the client part of the network game.")

@@ -25,4 +25,25 @@ public class Project {
 	public List<Task> getTasks() {
 		return tasks;
 	}
+
+    public void addTask(Task task) {
+        tasks.add(task);
+    }
+
+    public void removeTask(String task_name) {
+        for (Task task : tasks) {
+            if (task.getName().equals(task_name)) {
+                tasks.remove(task);
+            }
+        }
+    }
+
+    public Task getTask(String task_name) {
+        for (Task task : tasks) {
+            if (task.getName().equals(task_name)) {
+                return task;
+            }
+        }
+        return null;
+    }
 }
