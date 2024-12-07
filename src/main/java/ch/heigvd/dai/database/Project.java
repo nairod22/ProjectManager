@@ -21,16 +21,23 @@ public class Project {
         return name;
     }
 
-    public void addTask(Task task) {
+    public boolean addTask(Task task) {
+        if (getTask(task.getName()) != null) {
+            // task already exists
+            return false;
+        }
         tasks.add(task);
+        return true;
     }
 
-    public void removeTask(String task_name) {
+    public boolean removeTask(String task_name) {
         for (Task task : tasks) {
             if (task.getName().equals(task_name)) {
                 tasks.remove(task);
+                return true;
             }
         }
+        return false;
     }
 
     public Task getTask(String task_name) {

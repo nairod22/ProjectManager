@@ -174,10 +174,11 @@ public class Server implements Callable<Integer> {
               Project project;
               try {
                 project = gson.fromJson(arg, Project.class);
-                this.database.addProject(project);
-                response = Message.OKAYY + END_OF_LINE;
-                // valider que certains champs comme name ou id ne soient pas nuls après désérialisation ?
-                // c'est implicitement fait au travers de addProject() ?
+                boolean isPojectAdded = this.database.addProject(project);
+                if (isPojectAdded)
+                  response = Message.OKAYY + END_OF_LINE;
+                else
+                  response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
               } catch (Exception e) {
                response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
               }
@@ -185,8 +186,8 @@ public class Server implements Callable<Integer> {
 
             case DELPR -> {
               try {
-                boolean deleted = this.database.deleteProject(arg);
-                if (deleted){
+                boolean isProjectDeleted = this.database.deleteProject(arg);
+                if (isProjectDeleted){
                   response = Message.OKAYY + END_OF_LINE;
                 } else {
                   response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
@@ -200,8 +201,11 @@ public class Server implements Callable<Integer> {
               Task task;
               try {
                 task = gson.fromJson(arg, Task.class);
-                database.getProject(projectSelected).addTask(task);
-                response = Message.OKAYY + END_OF_LINE;
+                boolean isTaskAdded = database.getProject(projectSelected).addTask(task);
+                if (isTaskAdded)
+                  response = Message.OKAYY + END_OF_LINE;
+                else
+                  response = Message.ERROR + " " + Error.INVALID_TASK + END_OF_LINE;
               } catch (Exception e) {
                 response = Message.ERROR + " " + Error.INVALID_TASK + END_OF_LINE;
               }
@@ -209,10 +213,10 @@ public class Server implements Callable<Integer> {
 
             case DELTS -> {
               try {
-                if (database.getProject(projectSelected).getTask(arg) == null) {
+                boolean isTaskRemoved = database.getProject(projectSelected).removeTask(arg);
+                if (!isTaskRemoved) {
                   response = Message.ERROR + " " + Error.INVALID_TASK + END_OF_LINE;
                 } else {
-                  database.getProject(projectSelected).removeTask(arg);
                   response = Message.OKAYY + END_OF_LINE;
                 }
               } catch (Exception e) {
