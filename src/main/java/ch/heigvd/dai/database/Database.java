@@ -1,8 +1,8 @@
 package ch.heigvd.dai.database;
 
-import javax.xml.crypto.Data;
 import java.util.LinkedList;
 import java.util.List;
+
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Database {
