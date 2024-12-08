@@ -96,6 +96,14 @@ Start the server part of the network game.
 ```
 
 To run the server, you need to run the following command:
+
+```bash
+docker run -d -v /Users/doriankury/0.HEIG-VD/DAI/ProjectManager/database.json:/app/database.json project-manager
+```
+
+then
+
+
 ```bash
 java -jar target/java-tcp-programming-1.0-SNAPSHOT.jar server <port>
 ```
@@ -107,6 +115,18 @@ docker run -it project-manager server <port>
 ```
 
 The port is optional and will default to `6433`.
+
+for local use : 
+```bash
+docker run -d -p 6433:6433 project-manager server
+```
+
+or
+
+```bash
+docker run -it --network="host" project-manager client --host=localhost --port=6433
+```
+
 
 ### Client
 
