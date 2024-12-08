@@ -1,5 +1,6 @@
 package ch.heigvd.dai.database;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -9,6 +10,13 @@ public class Database {
 
 	public Database() {
 		this.projects = new CopyOnWriteArrayList<>();
+	}
+
+	public Database(Database other) {
+		this.projects = new ArrayList<>(other.projects.size());
+		for (Project project : other.projects) {
+			this.projects.add(new Project(project));
+		}
 	}
 
 	public boolean addProject(Project project) {
