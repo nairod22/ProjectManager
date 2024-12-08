@@ -1,57 +1,27 @@
 # Task Management Protocol Documentation
 
-## Database format (.json)
-    {
-      "projects": [
-        {
-          "name": "Project1",
-          "tasks": [
-            {
-              "name": "task1",
-              "metadata": {
-                "priority": "high",
-                "due": "2024-12-01"
-              }
-            },
-            {
-              "name": "task2",
-              "metadata": null
-            },
-            {
-              "name": "task3",
-              "metadata": null
-            }
-          ] 
-        },
-        {
-          "name": "Project2",
-          "tasks": [
-            {
-              "name": "task1",
-              "metadata": null
-            },
-            {
-              "name": "task2",
-              "metadata": {
-                "priority": "low",
-                "due": "2024-11-30"
-              }
-            }
-          ]
-        }
-      ]
-    }
+## Overview
 
-  ### General instruction about the database format
-  - The name of project and task must never be null !
-  - Metadata, priority or due could be null.
-  - If priority and due are null, then metadata become null.
-  - A project could be void (having zero task).
-  - Every name must be different.
+The Task Management Protocol (TMP) is a task management protocol that allows managing tasks between a client and a server. 
+
+## Transport protocol
+
+The TMP protocol is a text message protocol. It must use TCP (Transmission Control Protocol) to ensure reliable communication. It must also use port 6433. 
+
+Every message must be encoded in UTF-8 and delimited by a newline character (\n). The messages are treated as text messages.
+
+The initial connection must be established by the client.
+
+A lot of the data passed as payloads are formatted in `json`. 
+
+When errors occur, the client should negate (in any way possible) the action that returned an error. 
+
+The server only answers the clients messages. There is no message from the server to the client if the client didn't do a request first. 
+
+Once a client has disconnected, the server must close the connection and remove the client from the list of connected clients.
+
     
-
-
-## Connection Protocol
+## Messages
 ### HELLO
 - Purpose: Establish connection with server
 - Request: `HELLO`
@@ -250,8 +220,56 @@
 - Indicates successful completion of requested operation
 ### ERROR
 - Indicates operation failure
-- Always accompanied by error number explaining the failure reason
 
-### Error Codes
-//todo
+## Database format (.json)
+    {
+      "projects": [
+        {
+          "name": "Project1",
+          "tasks": [
+            {
+              "name": "task1",
+              "metadata": {
+                "priority": "high",
+                "due": "2024-12-01"
+              }
+            },
+            {
+              "name": "task2",
+              "metadata": null
+            },
+            {
+              "name": "task3",
+              "metadata": null
+            }
+          ] 
+        },
+        {
+          "name": "Project2",
+          "tasks": [
+            {
+              "name": "task1",
+              "metadata": null
+            },
+            {
+              "name": "task2",
+              "metadata": {
+                "priority": "low",
+                "due": "2024-11-30"
+              }
+            }
+          ]
+        }
+      ]
+    }
 
+  ### General instruction about the database format
+  - The name of project and task must never be null !
+  - Metadata, priority or due could be null.
+  - If priority and due are null, then metadata become null.
+  - A project could be void (having zero task).
+  - Every name must be different.
+
+## Diagram
+
+![Application protocol diagram](./protocol-diagram.png)
