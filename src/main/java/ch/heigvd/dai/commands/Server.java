@@ -178,29 +178,29 @@ public class Server implements Callable<Integer> {
 
 						case ADDPR -> {
 							Project project;
-							try {
-								project = gson.fromJson(arg, Project.class);
-								this.database.addProject(project);
-								response = Message.OKAYY + END_OF_LINE;
-
-								// valider que certains champs comme name ou id ne soient pas nuls après désérialisation ?
-								// c'est implicitement fait au travers de addProject() ?
-							} catch (Exception e) {
-								response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
-							}
+              try {
+                project = gson.fromJson(arg, Project.class);
+                boolean isPojectAdded = this.database.addProject(project);
+                if (isPojectAdded)
+                  response = Message.OKAYY + END_OF_LINE;
+                else
+                  response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
+              } catch (Exception e) {
+               response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
+              }
 						}
 
 						case DELPR -> {
 							try {
-								boolean deleted = this.database.deleteProject(arg);
-								if (deleted) {
-									response = Message.OKAYY + END_OF_LINE;
-								} else {
-									response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
-								}
-							} catch (Exception e) {
-								response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
-							}
+                boolean isProjectDeleted = this.database.deleteProject(arg);
+                if (isProjectDeleted){
+                  response = Message.OKAYY + END_OF_LINE;
+                } else {
+                  response = Message.ERROR + " " + Error.INVALID_PROJECT + END_OF_LINE;
+                }
+              } catch (Exception e) {
+                response = Message.ERROR + " " + Error.DATABASE_ERROR + END_OF_LINE;
+              }
 						}
 
 						case ADDTS -> {

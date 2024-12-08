@@ -4,11 +4,15 @@ public class Task {
 	private String name;
 	private Metadata metadata;
 
-	// metadata can be null
-	public Task(String name, Metadata metadata) {
-		this.name = name;
-		this.metadata = metadata;
-	}
+    //metadata can be null
+    public Task(String name, Metadata metadata) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Task name cannot be null");
+        }
+
+        this.name = name;
+        this.metadata = metadata;
+    }
 
 	public String getName() {
 		return name;
