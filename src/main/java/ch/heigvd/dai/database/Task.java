@@ -1,8 +1,8 @@
 package ch.heigvd.dai.database;
 
 public class Task {
-    private String name;
-    private Metadata metadata;
+	private String name;
+	private Metadata metadata;
 
     //metadata can be null
     public Task(String name, Metadata metadata) {
@@ -14,14 +14,20 @@ public class Task {
         this.metadata = metadata;
     }
 
-    public Task(Task task){
-        this.name = task.name;
-        this.metadata = task.metadata;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
+	public Metadata getMetadata() {
+		return metadata;
+	}
 
+	@Override
+	public String toString() {
+		return String.format("%s :\n%s", name, metadata.toString());
+	}
 }

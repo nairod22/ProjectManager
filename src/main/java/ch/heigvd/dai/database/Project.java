@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Project {
-    private String name;
-    private List<Task> tasks;
+	private String name;
+	private List<Task> tasks;
 
     //must have a name, but the task list could be null
     public Project(String name) {
@@ -17,9 +17,18 @@ public class Project {
         this.tasks = new CopyOnWriteArrayList<>();
     }
 
-    public String getName() {
-        return name;
-    }
+	public Project(String name, List<Task> tasks) {
+		this.name = name;
+		this.tasks = tasks;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public List<Task> getTasks() {
+		return tasks;
+	}
 
     public boolean addTask(Task task) {
         if (getTask(task.getName()) != null) {
