@@ -7,6 +7,7 @@ WORKDIR /app
 
 # Copy the jar file
 COPY target/java-tcp-programming-1.0-SNAPSHOT.jar /app/java-tcp-programming-1.0-SNAPSHOT.jar
+COPY database.json /app/database.json
 
 
 # Set the entrypoint
