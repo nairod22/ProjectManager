@@ -48,6 +48,7 @@ public class Client implements Callable<Integer> {
 
 	// private Map<String, Project> projects;
 	private Database db;
+	private Database tempDb;
 	private Project currentProject;
 
 	Menu currentMenu;
@@ -79,7 +80,8 @@ public class Client implements Callable<Integer> {
 
 			// projects = new HashMap<>();
 			db = new Database();
-			currentProject = new Project(null);
+			tempDb = new Database();
+			currentProject = null;
 			boolean firstLoop = true;
 			currentMenu = Menu.PROJECT;
 
@@ -148,6 +150,11 @@ public class Client implements Callable<Integer> {
 
 						case HELP -> {
 						}
+
+						case CLOSE -> {
+							request = Message.CLOSE + END_OF_LINE;
+							return 0;
+						}
 							// pas de default -> erreur gérée dans le catch !
 					}
 
@@ -188,14 +195,17 @@ public class Client implements Callable<Integer> {
 					case PROJL -> {
 						Gson gson = new Gson();
 						db = gson.fromJson(arg, Database.class);
+						tempDb = new Database(db);
 					}
 					case ERROR -> {
 						System.out.println("[Client] Receive ERROR");
+						tempDb = new Database(db);
 						// Give error to user so he can redo
 					}
 
 					case OKAYY -> {
-						System.out.println("[Client]  Receive OKAYY");
+						// System.out.println("[Client]  Receive OKAYY");
+						db = new Database(tempDb);
 					}
 
 					case PROJD -> {
@@ -228,7 +238,7 @@ public class Client implements Callable<Integer> {
 						}
 
 						Project project = new Project(projectName, tasks);
-						db.addProject(project);
+						tempDb.addProject(project);
 					}
 
 					case TASKD -> {
@@ -282,6 +292,7 @@ public class Client implements Callable<Integer> {
 			System.out.println("[Name]: Choose a project by name");
 			System.out.println("[add]: Add a new project");
 			System.out.println("[delete]: Delete a project by number or name");
+			System.out.println("[close]: Closes the connection and quits the program");
 			System.out.print("> ");
 
 			try {
@@ -308,7 +319,7 @@ public class Client implements Callable<Integer> {
 						int index = Integer.parseInt(toDelete) - 1;
 						if (index >= 0 && index < projectNames.size()) {
 							String removedProject = projectNames.remove(index);
-							db.deleteProject(removedProject);
+							tempDb.deleteProject(removedProject);
 							return "DELPR " + removedProject;
 						} else {
 							System.out.println("Invalid project number.");
@@ -317,7 +328,7 @@ public class Client implements Callable<Integer> {
 					// Handle delete by name
 					else if (db.getProject(toDelete) != null) {
 						projectNames.remove(toDelete);
-						db.deleteProject(toDelete);
+						tempDb.deleteProject(toDelete);
 						return "DELPR " + toDelete;
 					} else {
 						System.out.println("Invalid project name.");
@@ -339,6 +350,11 @@ public class Client implements Callable<Integer> {
 				if (db.getProject(userInput) != null) {
 					currentProject = db.getProject(userInput);
 					return "PROJS " + userInput;
+				}
+
+				if (userInput.equalsIgnoreCase("close")) {
+					System.out.println("Closing the application. Goodbye!");
+					return "CLOSE";
 				}
 
 				// Invalid input
@@ -363,7 +379,7 @@ public class Client implements Callable<Integer> {
 			if (taskMap.isEmpty()) {
 				System.out.println("No tasks available.");
 			} else {
-				taskMap.forEach((key, task) -> System.out.println("- " + key + ": " + task));
+				taskMap.forEach((key, task) -> System.out.println("- " + task));
 			}
 
 			System.out.println("\nOptions:");
@@ -371,6 +387,7 @@ public class Client implements Callable<Integer> {
 			System.out.println("[delete]: Delete a task");
 			System.out.println("[modify]: Modify a task");
 			System.out.println("[back]: Go back to project menu");
+			System.out.println("[close]: Closes the connection and quits the program");
 			System.out.print("> ");
 
 			try {
@@ -380,26 +397,40 @@ public class Client implements Callable<Integer> {
 				if (userInput.equalsIgnoreCase("add")) {
 					System.out.print("Enter the task name: ");
 					String taskName = reader.readLine().trim();
-					System.out.print("Enter the priority (low/medium/high) or leave empty: ");
-					String priorityInput = reader.readLine().trim().toUpperCase();
+
+					// Validate priority
 					String priority = null;
-					if (!priorityInput.isEmpty()) {
-						priority = priorityInput;
+					while (true) {
+						System.out.print("Enter the priority (low/medium/high) or leave empty: ");
+						String priorityInput = reader.readLine().trim().toUpperCase();
+						if (priorityInput.isEmpty() || priorityInput.matches("(?i)LOW|MEDIUM|HIGH")) {
+							priority = priorityInput.isEmpty() ? null : priorityInput;
+							break;
+						} else {
+							System.out.println("Invalid priority. Please enter 'low', 'medium', or 'high'.");
+						}
 					}
-					System.out.print("Enter the due date (YYYY-MM-DD) or leave empty: ");
-					String dueDateInput = reader.readLine().trim();
+
+					// Validate date
 					String dueDate = null;
-					if (!dueDateInput.isEmpty()) {
-						dueDate = dueDateInput;
+					while (true) {
+						System.out.print("Enter the due date (YYYY-MM-DD) or leave empty: ");
+						String dueDateInput = reader.readLine().trim();
+						if (dueDateInput.isEmpty() || dueDateInput.matches("\\d{4}-\\d{2}-\\d{2}")) {
+							dueDate = dueDateInput.isEmpty() ? null : dueDateInput;
+							break;
+						} else {
+							System.out.println("Invalid date format. Please use YYYY-MM-DD.");
+						}
 					}
+
 					Metadata metadata = new Metadata(priority, dueDate);
 					Task newTask = new Task(taskName, metadata);
 
 					taskMap.put(taskName, newTask);
 					currentProject.getTasks().add(newTask);
-					// String payload = gson.toJson(Map.of("task", Map.of("name", taskName, "metadata", metadata)));
 					String payload = gson.toJson(Map.of("name", taskName, "metadata", metadata));
-					db.getProject(currentProject.getName()).addTask(newTask);
+					tempDb.getProject(currentProject.getName()).addTask(newTask);
 					return "ADDTS " + payload;
 				}
 
@@ -410,7 +441,7 @@ public class Client implements Callable<Integer> {
 					if (taskMap.containsKey(taskName)) {
 						taskMap.remove(taskName);
 						currentProject.getTasks().removeIf(task -> task.getName().equals(taskName));
-						db.getProject(currentProject.getName()).removeTask(taskName);
+						tempDb.getProject(currentProject.getName()).removeTask(taskName);
 						return "DELTS " + taskName;
 					} else {
 						System.out.println("Task not found.");
@@ -436,21 +467,37 @@ public class Client implements Callable<Integer> {
 							taskName = newName;
 						}
 
-						System.out.print("New priority (low/medium/high) or leave empty: ");
-						String newPriorityInput = reader.readLine().trim().toUpperCase();
-						if (!newPriorityInput.isEmpty()) {
-							task.getMetadata().setPriority(newPriorityInput);
+						// Validate new priority
+						while (true) {
+							System.out.print("New priority (low/medium/high) or leave empty: ");
+							String newPriorityInput = reader.readLine().trim().toUpperCase();
+							if (newPriorityInput.isEmpty() || newPriorityInput.matches("LOW|MEDIUM|HIGH")) {
+								if (!newPriorityInput.isEmpty()) {
+									task.getMetadata().setPriority(newPriorityInput);
+								}
+								break;
+							} else {
+								System.out.println("Invalid priority. Please enter 'low', 'medium', or 'high'.");
+							}
 						}
 
-						System.out.print("New due date (YYYY-MM-DD) or leave empty: ");
-						String newDueDateInput = reader.readLine().trim();
-						if (!newDueDateInput.isEmpty()) {
-							task.getMetadata().setDue(newDueDateInput);
+						// Validate new date
+						while (true) {
+							System.out.print("New due date (YYYY-MM-DD) or leave empty: ");
+							String newDueDateInput = reader.readLine().trim();
+							if (newDueDateInput.isEmpty() || newDueDateInput.matches("\\d{4}-\\d{2}-\\d{2}")) {
+								if (!newDueDateInput.isEmpty()) {
+									task.getMetadata().setDue(newDueDateInput);
+								}
+								break;
+							} else {
+								System.out.println("Invalid date format. Please use YYYY-MM-DD.");
+							}
 						}
 
 						String payload = gson.toJson(Map.of("tasks", task));
-						db.getProject(currentProject.getName()).removeTask(oldName);
-						db.getProject(currentProject.getName()).addTask(task);
+						tempDb.getProject(currentProject.getName()).removeTask(oldName);
+						tempDb.getProject(currentProject.getName()).addTask(task);
 						return "MODTS " + taskName + " " + payload;
 					} else {
 						System.out.println("Task not found.");
@@ -462,6 +509,12 @@ public class Client implements Callable<Integer> {
 				if (userInput.equalsIgnoreCase("back")) {
 					currentMenu = Menu.PROJECT;
 					return null;
+				}
+
+				// Close
+				if (userInput.equalsIgnoreCase("close")) {
+					System.out.println("Closing the application. Goodbye!");
+					return "CLOSE";
 				}
 
 				// Invalid option
