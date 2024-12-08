@@ -18,8 +18,8 @@ There are 3 ways to use this app:
 ### Build from source
 First clone this repo on your machine and `cd` in the cloned folder:
 ```bash
-git clone git@github.com:BasileBux/java-io-audio-files.git
-cd java-io-audio-files
+git clone git@github.com:nairod22/ProjectManager.git
+cd ProjectManager
 ```
 You need to have [Maven](https://maven.apache.org/) and [SdkMan](https://sdkman.io/) installed on your system.
 
@@ -45,8 +45,8 @@ and add the options you want.
 
 First clone this repo on your machine and `cd` in the cloned folder:
 ```bash
-git clone git@github.com:BasileBux/java-io-audio-files.git
-cd java-io-audio-files
+git clone git@github.com:nairod22/ProjectManager.git
+cd ProjectManager
 ```
 
 Then, you need to build the docker image:
@@ -63,12 +63,11 @@ docker run -it project-manager
 
 You can also use the docker image from the github packages. To do so, you need to pull the image:
 ```bash
-docker pull ghcr.io/nairod/java-io-audio-files:latest
-```
+docker pull ghcr.io/nairod22/project-manager-docker:latest```
 
 And then run it:
 ```bash
-docker run -it ghcr.io/basilebux/java-io-audio-files:latest
+docker run -it ghcr.io/nairod22/project-manager-docker:latest
 ```
 
 ## How to use
@@ -97,6 +96,14 @@ Start the server part of the network game.
 ```
 
 To run the server, you need to run the following command:
+
+```bash
+docker run -d -v /Users/doriankury/0.HEIG-VD/DAI/ProjectManager/database.json:/app/database.json project-manager
+```
+
+then
+
+
 ```bash
 java -jar target/java-tcp-programming-1.0-SNAPSHOT.jar server <port>
 ```
@@ -108,6 +115,18 @@ docker run -it project-manager server <port>
 ```
 
 The port is optional and will default to `6433`.
+
+for local use : 
+```bash
+docker run -d -p 6433:6433 project-manager server
+```
+
+or
+
+```bash
+docker run -it --network="host" project-manager client --host=localhost --port=6433
+```
+
 
 ### Client
 
