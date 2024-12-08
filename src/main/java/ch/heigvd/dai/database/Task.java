@@ -24,6 +24,6 @@ public class Task {
 
 	@Override
 	public String toString() {
-		return String.format("%s :\n%s", name, metadata.toString());
+		return String.format("%s : %s", name, metadata.toString());
 	}
 }
