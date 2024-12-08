@@ -14,6 +14,10 @@ public class Metadata {
 		this.due = dueDate;
 	}
 
+	public Metadata(Metadata other) {
+		this(other.priority, other.due);
+	}
+
 	public String getPriority() {
 		return priority;
 	}
