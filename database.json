@@ -1,1 +1,1 @@
-{"projects":[{"name":"test1","tasks":[]},{"name":"test2","tasks":[]},{"name":"test1","tasks":[]},{"name":"test2","tasks":[]}]}
+{"projects":[{"name":"test1","tasks":[{"name":"correction","metadata":{"priority":"LOW"}}]},{"name":"test2","tasks":[]},{"name":"test1","tasks":[]},{"name":"test2","tasks":[]}]}

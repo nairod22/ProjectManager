@@ -1,3 +1,4 @@
+
 # Base image
 FROM eclipse-temurin:21-jre
 
@@ -6,6 +7,7 @@ WORKDIR /app
 
 # Copy the jar file
 COPY target/java-tcp-programming-1.0-SNAPSHOT.jar /app/java-tcp-programming-1.0-SNAPSHOT.jar
+
 
 # Set the entrypoint
 ENTRYPOINT ["java", "-jar", "java-tcp-programming-1.0-SNAPSHOT.jar"]
